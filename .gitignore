@@ -1,0 +1,18 @@
+# Build output
+build/
+build-*/
+bin/
+
+# Cloned blibc (make blibc / distclean)
+external/
+
+# Editors and tooling
+.vscode/
+.idea/
+.cache/
+compile_commands.json
+*.swp
+*~
+
+# macOS
+.DS_Store
