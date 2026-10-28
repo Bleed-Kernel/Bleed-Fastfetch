@@ -12,13 +12,20 @@ endif()
 # try_compile projects get a fresh cache, this carries the sysroot into them
 list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES BLEED_SYSROOT)
 
-set(CMAKE_C_COMPILER x86_64-elf-gcc)
-set(CMAKE_AR x86_64-elf-ar)
-set(CMAKE_RANLIB x86_64-elf-ranlib)
+find_program(BLEED_CROSS_GCC x86_64-elf-gcc)
+if(BLEED_CROSS_GCC)
+    set(CMAKE_C_COMPILER x86_64-elf-gcc)
+    set(CMAKE_AR x86_64-elf-ar)
+    set(CMAKE_RANLIB x86_64-elf-ranlib)
+else()
+    set(CMAKE_C_COMPILER gcc)
+    set(CMAKE_AR ar)
+    set(CMAKE_RANLIB ranlib)
+endif()
 
 # blibc's headers come first, gcc's own (cpuid.h, stdatomic.h and friends) fill in after them
 execute_process(COMMAND ${CMAKE_C_COMPILER} -print-file-name=include OUTPUT_VARIABLE BLEED_GCC_INCLUDE OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(CMAKE_C_FLAGS_INIT "-D__bleed__=1 -ffreestanding -fno-pic -fno-stack-protector -nostdinc -isystem ${BLEED_SYSROOT}/include -idirafter ${BLEED_GCC_INCLUDE}")
+set(CMAKE_C_FLAGS_INIT "-D__bleed__=1 -U__linux__ -U__linux -Ulinux -U__gnu_linux__ -ffreestanding -fno-pic -fno-stack-protector -nostdinc -isystem ${BLEED_SYSROOT}/include -idirafter ${BLEED_GCC_INCLUDE}")
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-static -nostdlib -no-pie ${BLEED_SYSROOT}/lib/start.o")
 set(CMAKE_C_STANDARD_LIBRARIES "${BLEED_SYSROOT}/lib/blibc.a -lgcc")
 
